@@ -22,7 +22,10 @@ export interface GetTaskArgs {
 export async function getTask(args: GetTaskArgs): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
     if (!args.id) {
-      throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Task id is required for get operation');
+      throw new MCPError(
+        ErrorCode.VALIDATION_ERROR, 
+        'Task ID is required for get operation. Please provide the "id" parameter with a valid task ID number. Example: { "subcommand": "get", "id": 123 }'
+      );
     }
     validateId(args.id, 'id');
 

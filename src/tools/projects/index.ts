@@ -63,7 +63,7 @@ export function registerProjectsTool(
 ): void {
   server.tool(
     'vikunja_projects',
-    'Manage projects with full CRUD operations, hierarchy management, and sharing capabilities',
+    'Manage projects with full CRUD operations, hierarchy management, and sharing capabilities. NOTE: Operations like get, update, delete, archive, unarchive, get-children, get-breadcrumb, and move require a specific project ID. Use list operation first to find project IDs, then use them in subsequent operations.',
     {
       subcommand: z.enum(['list', 'get', 'create', 'update', 'delete', 'archive', 'unarchive',
         'get-children', 'get-tree', 'get-breadcrumb', 'move',
@@ -116,7 +116,10 @@ export function registerProjectsTool(
 
             case 'get':
               if (args.id === undefined || args.id === null) {
-                throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required');
+                throw new MCPError(
+                  ErrorCode.VALIDATION_ERROR, 
+                  'Project ID is required for get operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "get", "id": 123 }'
+                );
               }
               validateId(args.id, 'id');
               return await getProject(args as GetProjectArgs, context);
@@ -129,32 +132,47 @@ export function registerProjectsTool(
 
           case 'update':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for update operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for update operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "update", "id": 123, "title": "Updated title" }'
+              );
             }
             return await updateProject(args as UpdateProjectArgs, context);
 
           case 'delete':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for delete operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for delete operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "delete", "id": 123 }'
+              );
             }
             return await deleteProject(args as DeleteProjectArgs, context);
 
           case 'archive':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for archive operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for archive operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "archive", "id": 123 }'
+              );
             }
             return await archiveProject(args as ArchiveProjectArgs, context);
 
           case 'unarchive':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for unarchive operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for unarchive operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "unarchive", "id": 123 }'
+              );
             }
             return await unarchiveProject(args as ArchiveProjectArgs, context);
 
           // Hierarchy operations
           case 'get-children':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for get-children operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for get-children operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "get-children", "id": 123 }'
+              );
             }
             return await getProjectChildren(args as GetChildrenArgs, context);
 
@@ -163,13 +181,19 @@ export function registerProjectsTool(
 
           case 'get-breadcrumb':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for get-breadcrumb operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for get-breadcrumb operation. Please provide the "id" parameter with a valid project ID number. Example: { "subcommand": "get-breadcrumb", "id": 123 }'
+              );
             }
             return await getProjectBreadcrumb(args as GetBreadcrumbArgs, context);
 
           case 'move':
             if (!args.id) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required for move operation');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for move operation. Please provide the "id" parameter with a valid project ID number and optionally "parentProjectId" for the destination. Example: { "subcommand": "move", "id": 123, "parentProjectId": 456 }'
+              );
             }
             validateId(args.id, 'id');
             return await moveProject(args as MoveProjectArgs, context);
@@ -177,22 +201,34 @@ export function registerProjectsTool(
           // Sharing operations
           case 'create-share':
             if (!args.projectId) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for create-share operation. Please provide the "projectId" parameter with a valid project ID number. Example: { "subcommand": "create-share", "projectId": 123, "right": "read" }'
+              );
             }
             if (!args.right) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share right is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Share right is required for create-share operation. Please provide the "right" parameter with one of: "read", "write", "admin". Example: { "subcommand": "create-share", "projectId": 123, "right": "read" }'
+              );
             }
             return await createProjectShare(args as CreateShareArgs, context);
 
           case 'list-shares':
             if (!args.projectId) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Project ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Project ID is required for list-shares operation. Please provide the "projectId" parameter with a valid project ID number. Example: { "subcommand": "list-shares", "projectId": 123 }'
+              );
             }
             return await listProjectShares(args as ListSharesArgs, context);
 
           case 'get-share':
             if (args.shareId === undefined || args.shareId === null) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Share ID is required for get-share operation. Please provide the "shareId" parameter with a valid share ID string. Example: { "subcommand": "get-share", "shareId": "abc123" }'
+              );
             }
             if (args.shareId.trim() === '') {
               throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share ID must be a non-empty string');
@@ -201,7 +237,10 @@ export function registerProjectsTool(
 
           case 'delete-share':
             if (args.shareId === undefined || args.shareId === null) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Share ID is required for delete-share operation. Please provide the "shareId" parameter with a valid share ID string. Example: { "subcommand": "delete-share", "shareId": "abc123" }'
+              );
             }
             if (args.shareId.trim() === '') {
               throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share ID must be a non-empty string');
@@ -210,7 +249,10 @@ export function registerProjectsTool(
 
           case 'auth-share':
             if (!args.shareHash) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Share hash is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Share hash is required for auth-share operation. Please provide the "shareHash" parameter with a valid share hash string. Example: { "subcommand": "auth-share", "shareHash": "xyz789" }'
+              );
             }
             const authShareArgs: AuthShareArgs = {
               shareHash: args.shareHash

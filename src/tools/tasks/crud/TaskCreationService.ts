@@ -13,6 +13,7 @@ import { transformApiError, handleFetchError } from '../../../utils/error-handle
 import { AUTH_ERROR_MESSAGES } from '../constants';
 import { validateDateString, validateId, convertRepeatConfiguration } from '../validation';
 import { createTaskResponse } from './TaskResponseFormatter';
+import { findInboxProject, getInboxProjectId, validateProjectExists } from './InboxDetectionService';
 import type { AorpBuilderConfig } from '../../../aorp/types';
 
 export interface CreateTaskArgs {
@@ -46,11 +47,31 @@ interface CreationState {
  */
 export async function createTask(args: CreateTaskArgs): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
-    // Validate required fields
-    if (!args.projectId) {
-      throw new MCPError(ErrorCode.VALIDATION_ERROR, 'projectId is required to create a task');
+    // Handle projectId - auto-detect Inbox if not provided
+    let projectId = args.projectId;
+    let usedInboxDetection = false;
+    
+    if (!projectId) {
+      try {
+        const inboxProject = await findInboxProject();
+        projectId = inboxProject.id!;
+        usedInboxDetection = true;
+        logger.info('Auto-detected Inbox project for task creation', { 
+          projectId, 
+          projectTitle: inboxProject.title 
+        });
+      } catch (inboxError) {
+        throw new MCPError(
+          ErrorCode.VALIDATION_ERROR,
+          `No projectId provided and failed to find Inbox project automatically. Please specify a projectId explicitly. Error: ${inboxError instanceof Error ? inboxError.message : String(inboxError)}`
+        );
+      }
+    } else {
+      // Validate the provided projectId exists
+      await validateProjectExists(projectId);
     }
-    validateId(args.projectId, 'projectId');
+    
+    validateId(projectId, 'projectId');
 
     if (!args.title) {
       throw new MCPError(ErrorCode.VALIDATION_ERROR, 'title is required to create a task');
@@ -71,7 +92,7 @@ export async function createTask(args: CreateTaskArgs): Promise<{ content: Array
     // Build the initial task object
     const newTask: Task = {
       title: args.title,
-      project_id: args.projectId,
+      project_id: projectId,
     };
 
     // Add optional fields
@@ -90,7 +111,7 @@ export async function createTask(args: CreateTaskArgs): Promise<{ content: Array
     }
 
     // Create the base task
-    const createdTask = await client.tasks.createTask(args.projectId, newTask);
+    const createdTask = await client.tasks.createTask(projectId, newTask);
 
     // Track creation state for potential rollback
     const creationState: CreationState = {
@@ -127,9 +148,10 @@ export async function createTask(args: CreateTaskArgs): Promise<{ content: Array
       { task: completeTask },
       {
         timestamp: new Date().toISOString(),
-        projectId: args.projectId,
+        projectId: projectId,
         labelsAdded: args.labels ? args.labels.length > 0 : false,
         assigneesAdded: args.assignees ? args.assignees.length > 0 : false,
+        usedInboxDetection,
       },
       args.verbosity,
       args.useOptimizedFormat,

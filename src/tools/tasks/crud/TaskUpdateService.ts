@@ -46,14 +46,25 @@ interface UpdateState {
  */
 export async function updateTask(args: UpdateTaskArgs): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
-    if (!args.id) {
-      throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Task id is required for update operation');
-    }
+  if (!args.id) {
+    throw new MCPError(
+      ErrorCode.VALIDATION_ERROR, 
+      'Task ID is required for update operation. Please provide the "id" parameter with a valid task ID number. Example: { "subcommand": "update", "id": 123, "title": "Updated title" }'
+    );
+  }
     validateId(args.id, 'id');
 
     // Validate date if provided
     if (args.dueDate) {
       validateDateString(args.dueDate, 'dueDate');
+    }
+
+    // Check if user is trying to update labels - direct them to use apply-label instead
+    if (args.labels !== undefined) {
+      throw new MCPError(
+        ErrorCode.VALIDATION_ERROR,
+        `To add or remove labels from a task, use the "apply-label" subcommand instead of "update". Example: { "subcommand": "apply-label", "id": ${args.id}, "labels": [1, 2, 3] }. For removing labels, use "remove-label" subcommand.`
+      );
     }
 
     const client = await getClientFromContext();

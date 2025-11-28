@@ -118,6 +118,20 @@ async function listTasks(
 }
 
 /**
+ * Validate task ID requirement based on subcommand
+ */
+function validateTaskIdRequirement(args: any): void {
+  const subcommandsRequiringId = ['get', 'update', 'delete', 'relate', 'unrelate', 'relations'];
+  
+  if (subcommandsRequiringId.includes(args.subcommand) && !args.id) {
+    throw new MCPError(
+      ErrorCode.VALIDATION_ERROR,
+      `Task ID is required for '${args.subcommand}' operation. Please provide the 'id' parameter with a valid task ID number. Example: { "subcommand": "${args.subcommand}", "id": 123 }`
+    );
+  }
+}
+
+/**
  * Handle file attachments (not supported)
  */
 function handleAttach(): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
@@ -136,7 +150,7 @@ export function registerTasksTool(
 ): void {
   server.tool(
     'vikunja_tasks',
-    'Manage tasks with comprehensive operations (create, update, delete, list, assign, attach files, comment, bulk operations)',
+    'Manage tasks with comprehensive operations. Auto-detects Inbox project for creation. Use specific subcommands: create (auto-Inbox), get (requires id), update (requires id), delete (requires id), list, relate (for subtasks), apply-label (for labels), bulk operations. All date fields require ISO format: YYYY-MM-DDTHH:mm:ss.sssZ',
     {
       subcommand: z.enum([
         'create',
@@ -233,6 +247,9 @@ export function registerTasksTool(
 
         // Test client connection
         await getClientFromContext();
+
+        // Validate task ID requirement for operations that need it
+        validateTaskIdRequirement(args);
 
         switch (args.subcommand) {
           case 'list': {

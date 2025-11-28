@@ -69,17 +69,26 @@ export async function handleRelationSubcommands(
     case 'relate': {
       try {
         if (!args.id) {
-          throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Task ID is required');
+          throw new MCPError(
+            ErrorCode.VALIDATION_ERROR, 
+            'Task ID is required for relate operation. Please provide the "id" parameter with a valid task ID number. Example: { "subcommand": "relate", "id": 123, "otherTaskId": 456, "relationKind": "subtask" }'
+          );
         }
         validateSharedId(args.id, 'Task ID');
 
         if (!args.otherTaskId) {
-          throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Other task ID is required');
+          throw new MCPError(
+            ErrorCode.VALIDATION_ERROR, 
+            'Other task ID is required for relate operation. Please provide the "otherTaskId" parameter with a valid task ID number. For subtasks: "id" is the parent task, "otherTaskId" is the subtask. Example: { "subcommand": "relate", "id": 123, "otherTaskId": 456, "relationKind": "subtask" }'
+          );
         }
         validateSharedId(args.otherTaskId, 'Other task ID');
 
         if (!args.relationKind) {
-          throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Relation kind is required');
+          throw new MCPError(
+            ErrorCode.VALIDATION_ERROR, 
+            'Relation kind is required for relate operation. Please provide the "relationKind" parameter. For creating subtasks, use "subtask". Example: { "subcommand": "relate", "id": 123, "otherTaskId": 456, "relationKind": "subtask" }'
+          );
         }
 
         const relationKind = RELATION_KIND_MAP[args.relationKind];

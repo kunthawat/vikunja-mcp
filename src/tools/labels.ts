@@ -19,7 +19,7 @@ import type { TypedVikunjaClient } from '../types/node-vikunja-extended';
 export function registerLabelsTool(server: McpServer, authManager: AuthManager, _clientFactory?: VikunjaClientFactory): void {
   server.tool(
     'vikunja_labels',
-    'Manage task labels with full CRUD operations for organizing and categorizing tasks',
+    'Manage task labels with full CRUD operations for organizing and categorizing tasks. NOTE: Operations like get, update, and delete require a specific label ID. Use list operation first to find label IDs, then use them in subsequent operations. For hex colors, use format #RRGGBB (e.g., #FF5733, #00FF00, #0000FF).',
     {
       // Operation type
       subcommand: z.enum(['list', 'get', 'create', 'update', 'delete']).optional(),
@@ -82,7 +82,10 @@ export function registerLabelsTool(server: McpServer, authManager: AuthManager, 
 
           case 'get': {
             if (args.id === undefined) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Label ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Label ID is required for get operation. Please provide the "id" parameter with a valid label ID number. Example: { "subcommand": "get", "id": 123 }'
+              );
             }
             validateAndConvertId(args.id, 'id');
 
@@ -106,7 +109,10 @@ export function registerLabelsTool(server: McpServer, authManager: AuthManager, 
 
           case 'create': {
             if (!args.title) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Title is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Title is required for create operation. Please provide the "title" parameter with a non-empty string. Example: { "subcommand": "create", "title": "Urgent", "hexColor": "#FF5733" }'
+              );
             }
 
             const labelData: Partial<Label> = {
@@ -136,14 +142,17 @@ export function registerLabelsTool(server: McpServer, authManager: AuthManager, 
 
           case 'update': {
             if (args.id === undefined) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Label ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Label ID is required for update operation. Please provide the "id" parameter with a valid label ID number. Example: { "subcommand": "update", "id": 123, "title": "Updated Title" }'
+              );
             }
             validateAndConvertId(args.id, 'id');
 
             if (!args.title && args.description === undefined && !args.hexColor) {
               throw new MCPError(
                 ErrorCode.VALIDATION_ERROR,
-                'At least one field to update is required',
+                'At least one field to update is required. Please provide at least one of: title, description, or hexColor. Example: { "subcommand": "update", "id": 123, "title": "Updated Title", "hexColor": "#FF5733" }',
               );
             }
 
@@ -173,7 +182,10 @@ export function registerLabelsTool(server: McpServer, authManager: AuthManager, 
 
           case 'delete': {
             if (args.id === undefined) {
-              throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Label ID is required');
+              throw new MCPError(
+                ErrorCode.VALIDATION_ERROR, 
+                'Label ID is required for delete operation. Please provide the "id" parameter with a valid label ID number. Example: { "subcommand": "delete", "id": 123 }'
+              );
             }
             validateAndConvertId(args.id, 'id');
 

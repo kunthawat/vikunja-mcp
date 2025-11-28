@@ -26,7 +26,10 @@ export interface DeleteTaskArgs {
 export async function deleteTask(args: DeleteTaskArgs): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
     if (!args.id) {
-      throw new MCPError(ErrorCode.VALIDATION_ERROR, 'Task id is required for delete operation');
+      throw new MCPError(
+        ErrorCode.VALIDATION_ERROR, 
+        'Task ID is required for delete operation. Please provide the "id" parameter with a valid task ID number. Example: { "subcommand": "delete", "id": 123 }'
+      );
     }
     validateId(args.id, 'id');
 

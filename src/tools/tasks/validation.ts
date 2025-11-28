@@ -6,16 +6,54 @@ import { MCPError, ErrorCode } from '../../types/index';
 import { validateId as validateSharedId } from '../../utils/validation';
 
 /**
- * Validates that a date string is in valid ISO 8601 format
+ * Validates that a date string is in the specific ISO 8601 format required by Vikunja
+ * Format: YYYY-MM-DDTHH:mm:ss.sssZ (with milliseconds)
  */
 export function validateDateString(date: string, fieldName: string): void {
+  // Check if it matches the specific format with milliseconds
+  const isoWithMillisecondsRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+  
+  if (!isoWithMillisecondsRegex.test(date)) {
+    throw new MCPError(
+      ErrorCode.VALIDATION_ERROR,
+      `${fieldName} must be in ISO 8601 format with milliseconds: YYYY-MM-DDTHH:mm:ss.sssZ. Example: 2025-10-30T04:05:22.422Z. Received: ${date}`,
+    );
+  }
+  
+  // Additional validation: ensure it's a valid date
   const parsed = new Date(date);
   if (isNaN(parsed.getTime())) {
     throw new MCPError(
       ErrorCode.VALIDATION_ERROR,
-      `${fieldName} must be a valid ISO 8601 date string (e.g., 2024-05-24T10:00:00Z)`,
+      `${fieldName} must be a valid date. Received: ${date}`,
     );
   }
+}
+
+/**
+ * Formats a Date object to the required ISO format with milliseconds
+ */
+export function formatDateToISO(date: Date): string {
+  // Get the ISO string and ensure it has milliseconds
+  const isoString = date.toISOString();
+  
+  // The toISOString() already returns the correct format: YYYY-MM-DDTHH:mm:ss.sssZ
+  return isoString;
+}
+
+/**
+ * Creates a date string in the required format for current time
+ */
+export function getCurrentTimeString(): string {
+  return formatDateToISO(new Date());
+}
+
+/**
+ * Creates a date string in the required format for a specific date
+ */
+export function createDateString(year: number, month: number, day: number, hour: number = 0, minute: number = 0, second: number = 0): string {
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  return formatDateToISO(date);
 }
 
 /**
