@@ -228,7 +228,17 @@ export function registerTasksTool(
       verbosity: z.enum(['minimal', 'standard', 'detailed', 'complete']).optional(),
       useOptimizedFormat: z.boolean().optional(),
       useAorp: z.boolean().optional(),
-      aorpConfig: AorpBuilderConfigSchema, // AorpBuilderConfig with proper Zod schema
+      aorpConfig: z.object({
+        confidenceMethod: z.enum(['adaptive', 'weighted', 'simple']).optional(),
+        enableNextSteps: z.boolean().optional(),
+        enableQualityIndicators: z.boolean().optional(),
+        confidenceWeights: z.object({
+          success: z.number(),
+          dataSize: z.number(),
+          responseTime: z.number(),
+          completeness: z.number(),
+        }).optional(),
+      }).optional(), // AorpBuilderConfig with proper Zod schema
       sessionId: z.string().optional(),
     },
     async (args) => {
