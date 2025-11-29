@@ -1,6 +1,6 @@
 {
   "name": "@kunthawat/vikunja-mcp",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Model Context Protocol server for Vikunja task management - Enhanced with AI clarity improvements and enterprise-grade security",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
