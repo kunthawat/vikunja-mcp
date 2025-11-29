@@ -17,10 +17,10 @@ export async function findInboxProject(): Promise<Project> {
     const client = await getClientFromContext();
     
     // Get all projects for the user
-    const projects = await client.projects.getAllProjects();
+    const projects = await client.projects.getProjects();
     
     // Look for project named "Inbox" (case-insensitive)
-    const inboxProject = projects.find(project => 
+    const inboxProject = projects.find((project: Project) => 
       project.title?.toLowerCase() === 'inbox'
     );
     
@@ -31,7 +31,7 @@ export async function findInboxProject(): Promise<Project> {
     
     // If no "Inbox" found, look for common alternatives
     const alternativeNames = ['inbox', 'default', 'personal', 'tasks'];
-    const alternativeProject = projects.find(project => 
+    const alternativeProject = projects.find((project: Project) => 
       alternativeNames.includes(project.title?.toLowerCase() || '')
     );
     
@@ -44,12 +44,13 @@ export async function findInboxProject(): Promise<Project> {
     }
     
     // If still no suitable project found, use the first available project
-    if (projects.length > 0 && projects[0].id) {
+    if (projects.length > 0 && projects[0]?.id) {
+      const firstProject = projects[0];
       logger.debug('Using first available project as fallback', { 
-        projectId: projects[0].id, 
-        title: projects[0].title 
+        projectId: firstProject.id, 
+        title: firstProject.title 
       });
-      return projects[0];
+      return firstProject;
     }
     
     throw new MCPError(

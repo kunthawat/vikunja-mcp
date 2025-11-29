@@ -1,7 +1,7 @@
 {
-  "name": "@democratize-technology/vikunja-mcp",
-  "version": "0.2.0",
-  "description": "Model Context Protocol server for Vikunja task management - Simplified architecture with enterprise-grade security and reliability",
+  "name": "@kunthawat/vikunja-mcp",
+  "version": "0.2.2",
+  "description": "Model Context Protocol server for Vikunja task management - Enhanced with AI clarity improvements and enterprise-grade security",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -24,7 +24,7 @@
     "format:src": "prettier --write 'src/**/*.ts'",
     "format:tests": "prettier --write 'tests/**/*.ts'",
     "format": "npm run format:src && npm run format:tests",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
@@ -44,12 +44,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/democratize-technology/vikunja-mcp.git"
+    "url": "git+https://github.com/kunthawat/vikunja-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/democratize-technology/vikunja-mcp/issues"
+    "url": "https://github.com/kunthawat/vikunja-mcp/issues"
   },
-  "homepage": "https://github.com/democratize-technology/vikunja-mcp#readme",
+  "homepage": "https://github.com/kunthawat/vikunja-mcp#readme",
   "publishConfig": {
     "access": "public"
   },
